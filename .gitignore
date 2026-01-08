@@ -1,44 +1,4 @@
-# dependencies
+git add app/page.tsx
+git commit -m "Add navigation links to homepage buttons"
+git push
 node_modules
-.pnp
-.pnp.js
-
-# testing
-coverage
-
-# next.js
-.next
-out
-build
-dist
-
-# misc
-.DS_Store
-*.pem
-*.exe
-*.dll
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env
-.env*.local
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/

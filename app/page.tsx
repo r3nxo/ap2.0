@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Activity, Zap, Bell, Filter } from 'lucide-react';
 
@@ -119,12 +120,12 @@ export default function Home() {
           transition={{ delay: 1, duration: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <button className="btn-primary">
+          <Link href="/login" className="btn-primary">
             Începe Scanarea
-          </button>
-          <button className="btn-secondary">
-            Configurare Filtre
-          </button>
+          </Link>
+          <Link href="/dashboard" className="btn-secondary">
+            Dashboard
+          </Link>
         </motion.div>
 
         {/* PWA Install Indicator */}
