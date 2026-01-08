@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  body {
+    @apply bg-primary text-text-primary;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-primary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    @apply rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-accent-cyan text-primary;
+  }
+}
+
+@layer components {
+  /* Glass Card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    @apply backdrop-blur-md rounded-2xl;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+  
+  .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 245, 255, 0.15);
+  }
+
+  /* Live Indicator */
+  .live-pulse {
+    @apply relative;
+  }
+
+  .live-pulse::before {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-accent-cyan animate-ping;
+  }
+
+  .live-pulse::after {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-accent-cyan;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-accent-cyan to-accent-amber bg-clip-text text-transparent;
+  }
+
+  /* Button Variants */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-display font-semibold bg-accent-cyan text-primary transition-all duration-300 active:scale-95;
+  }
+  
+  .btn-primary:hover {
+    background: rgba(0, 245, 255, 0.9);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl font-display font-semibold glass-card transition-all duration-300 active:scale-95;
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-ghost {
+    @apply px-6 py-3 rounded-xl font-display font-semibold transition-all duration-300 active:scale-95;
+  }
+  
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Input Styling */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl glass-card text-text-primary transition-all duration-300;
+  }
+  
+  .input-field::placeholder {
+    @apply text-text-muted;
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.5);
+  }
+
+  /* Stat Card */
+  .stat-card {
+    @apply glass-card p-4 flex flex-col gap-2;
+  }
+
+  .stat-label {
+    @apply text-xs text-text-secondary uppercase tracking-wider font-display;
+  }
+
+  .stat-value {
+    @apply text-2xl font-display font-bold gradient-text;
+  }
+
+  /* Match Status */
+  .status-live {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-display font-semibold;
+    background: rgba(0, 245, 255, 0.1);
+    color: #00F5FF;
+  }
+
+  .status-finished {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-display font-semibold;
+    background: rgba(156, 163, 175, 0.1);
+    color: #9CA3AF;
+  }
+
+  .status-upcoming {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-display font-semibold;
+    background: rgba(255, 184, 0, 0.1);
+    color: #FFB800;
+  }
+}
+
+@layer utilities {
+  /* Text Utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Animation Delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-pulse rounded;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Backdrop Blur iOS Fix */
+  .backdrop-blur-fix {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Custom Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* iOS Safe Area */
+@supports (padding: max(0px)) {
+  body {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}

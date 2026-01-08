@@ -1,0 +1,368 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  Settings,
+  ArrowLeft,
+  User,
+  Lock,
+  Bell,
+  Save,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react';
+import AuthWrapper from '@/components/AuthWrapper';
+
+export default function SettingsPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    // Get user from localStorage (set during login)
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('rsq_user');
+      if (userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          setUser(userData);
+          setFormData({
+            full_name: userData.full_name || '',
+            email: userData.email || '',
+          });
+        } catch (err) {
+          console.error('Failed to parse user data:', err);
+        }
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      if (!user?.id) {
+        setError('ID utilizator nu găsit');
+        setSaving(false);
+        return;
+      }
+
+      const response = await fetch('/api/user/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'updateProfile',
+          userId: user.id,
+          full_name: formData.full_name,
+          email: formData.email,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Nu s-a putut actualiza profilul');
+        return;
+      }
+
+      // Update localStorage with new data
+      const updatedUser = {
+        ...user,
+        full_name: formData.full_name,
+      };
+      localStorage.setItem('rsq_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      setSuccess('Profil actualizat cu succes!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Profile update error:', err);
+      setError('Nu s-a putut actualiza profilul');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    setSuccess('');
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError('Passwords do not match');
+      setSaving(false);
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setError('New password must be at least 6 characters');
+      setSaving(false);
+      return;
+    }
+
+    try {
+      if (!user?.id) {
+        setError('User ID not found');
+        setSaving(false);
+        return;
+      }
+
+      const response = await fetch('/api/user/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'changePassword',
+          userId: user.id,
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to change password');
+        return;
+      }
+
+      setSuccess('Parola schimbată cu succes!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Password change error:', err);
+      setError('Nu s-a putut schimba parola');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AuthWrapper>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-cyan"></div>
+        </div>
+      </AuthWrapper>
+    );
+  }
+
+  return (
+    <AuthWrapper>
+      <div className="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-accent p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-2xl mx-auto"
+        >
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6 text-text-secondary" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-display font-bold gradient-text">Settings</h1>
+              <p className="text-text-secondary mt-1">Manage your account and preferences</p>
+            </div>
+          </div>
+
+          {/* Alerts */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3"
+            >
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-red-500">{error}</p>
+            </motion.div>
+          )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-3"
+            >
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+              <p className="text-green-500">{success}</p>
+            </motion.div>
+          )}
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-8 border-b border-white/10">
+            {[
+              { id: 'profile', label: 'Profil', icon: User },
+              { id: 'password', label: 'Parolă', icon: Lock },
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`px-4 py-3 font-display font-semibold flex items-center gap-2 transition-all ${
+                  activeTab === id
+                    ? 'text-accent-cyan border-b-2 border-accent-cyan'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          {activeTab === 'profile' && (
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onSubmit={handleSaveProfile}
+              className="glass-card p-6 space-y-6"
+            >
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Nume Complet
+                </label>
+                <input
+                  type="text"
+                  value={formData.full_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, full_name: e.target.value })
+                  }
+                  className="input-field w-full"
+                  placeholder="Introduce-ți numele complet"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="input-field w-full"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full btn-primary flex items-center justify-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? 'Se salvează...' : 'Salvează Modificări'}
+              </button>
+            </motion.form>
+          )}
+
+          {activeTab === 'password' && (
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onSubmit={handleChangePassword}
+              className="glass-card p-6 space-y-6"
+            >
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Parola Curentă
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  className="input-field w-full"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Parolă Nouă
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    })
+                  }
+                  className="input-field w-full"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Confirmă Parola
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  className="input-field w-full"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full btn-primary flex items-center justify-center gap-2"
+              >
+                <Lock className="w-4 h-4" />
+                {saving ? 'Changing...' : 'Change Password'}
+              </button>
+            </motion.form>
+          )}
+        </motion.div>
+      </div>
+    </AuthWrapper>
+  );
+}

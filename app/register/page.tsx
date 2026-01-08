@@ -1,0 +1,467 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { 
+  Lock, 
+  User, 
+  AlertCircle, 
+  Zap, 
+  CheckCircle2,
+  Bell,
+  MessageCircle,
+  LogIn,
+  ChevronRight,
+  Mail
+} from 'lucide-react';
+import { authHelpers } from '@/lib/supabase';
+
+export default function RegisterPage() {
+  const router = useRouter();
+  
+  // ============================================
+  // STATE
+  // ============================================
+  const [step, setStep] = useState(1); // 1: register, 2: notifications, 3: telegram, 4: login
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  
+  // Notifications
+  const [enableNotifications, setEnableNotifications] = useState(false);
+  
+  // Telegram
+  const [telegramUsername, setTelegramUsername] = useState('');
+  const [enableTelegram, setEnableTelegram] = useState(false);
+
+  // ============================================
+  // HANDLERS
+  // ============================================
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (password !== confirmPassword) {
+      setError('Parolele nu se potrivesc!');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Parola trebuie să aibă minim 6 caractere!');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          username, 
+          password, 
+          fullName,
+          email 
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setStep(2);
+        setLoading(false);
+      } else {
+        setError(result.error || 'Eroare la înregistrare');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('Eroare la conectare');
+      setLoading(false);
+    }
+  };
+
+  const handleSkipNotifications = () => {
+    setStep(3);
+  };
+
+  const handleSkipTelegram = () => {
+    setStep(4);
+  };
+
+  const handleFinish = () => {
+    router.push('/login?user=' + username);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-cyan/5 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-amber/5 rounded-full blur-3xl animate-pulse-slow animation-delay-200" />
+      </div>
+
+      {/* Main Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        {/* Logo/Title */}
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="inline-flex items-center gap-2 mb-4"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-cyan to-accent-amber flex items-center justify-center">
+              <Zap className="w-6 h-6 text-primary" />
+            </div>
+          </motion.div>
+          
+          <h1 className="text-4xl font-display font-bold gradient-text mb-2">
+            R$Q
+          </h1>
+          <p className="text-text-secondary">Football Scanner</p>
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="flex justify-between mb-8">
+          {[1, 2, 3, 4].map((stepNum) => (
+            <motion.div
+              key={stepNum}
+              className={`h-1 flex-1 mx-1 rounded-full transition-all ${
+                stepNum <= step ? 'bg-accent-cyan' : 'bg-glass-medium'
+              }`}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: stepNum * 0.1 }}
+            />
+          ))}
+        </div>
+
+        {/* Step 1: Registration */}
+        {step === 1 && (
+          <motion.form
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            onSubmit={handleRegister}
+            className="glass-card p-8 space-y-6"
+          >
+            <div>
+              <h2 className="text-2xl font-display font-bold text-text-primary mb-2">
+                Crează Cont Nou
+              </h2>
+              <p className="text-text-muted text-sm">Pasul 1 din 4</p>
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex gap-3"
+              >
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <p className="text-sm text-red-400">{error}</p>
+              </motion.div>
+            )}
+
+            <div className="space-y-4">
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Nume Complet
+                </label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="input-field pl-12"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  E-mail
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-field pl-12"
+                    placeholder="john@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Nume utilizator
+                </label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="input-field pl-12"
+                    placeholder="johndoe"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Parola
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field pl-12"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-display text-text-secondary mb-2">
+                  Confirmă Parola
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-field pl-12"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? 'Se procesează...' : 'Înregistrare'}
+              {!loading && <ChevronRight className="w-5 h-5" />}
+            </button>
+
+            <p className="text-center text-sm text-text-muted">
+              Ai deja cont?{' '}
+              <button
+                type="button"
+                onClick={() => router.push('/login')}
+                className="text-accent-cyan hover:text-accent-cyan/80 font-semibold transition-colors"
+              >
+                Loghează-te
+              </button>
+            </p>
+          </motion.form>
+        )}
+
+        {/* Step 2: Notifications */}
+        {step === 2 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="glass-card p-8 space-y-6"
+          >
+            <div>
+              <h2 className="text-2xl font-display font-bold text-text-primary mb-2">
+                Notificări
+              </h2>
+              <p className="text-text-muted text-sm">Pasul 2 din 4</p>
+            </div>
+
+            <div className="bg-glass-light rounded-xl p-6 border border-glass-medium space-y-4">
+              <div className="flex items-start gap-4">
+                <Bell className="w-6 h-6 text-accent-amber mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-text-primary mb-1">
+                    Activează Notificări Web
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    Primește alerte în timp real când se găsesc meciuri potrivite
+                  </p>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 mt-4">
+                <input
+                  type="checkbox"
+                  checked={enableNotifications}
+                  onChange={(e) => setEnableNotifications(e.target.checked)}
+                  className="w-5 h-5 rounded accent-cyan cursor-pointer"
+                />
+                <span className="text-sm font-medium">Activează notificări</span>
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleSkipNotifications}
+                className="flex-1 btn-secondary py-3 rounded-lg font-semibold transition-all"
+              >
+                Sări
+              </button>
+              <button
+                onClick={() => setStep(3)}
+                className="flex-1 btn-primary py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+              >
+                Continuă
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 3: Telegram */}
+        {step === 3 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="glass-card p-8 space-y-6"
+          >
+            <div>
+              <h2 className="text-2xl font-display font-bold text-text-primary mb-2">
+                Conectează Telegram
+              </h2>
+              <p className="text-text-muted text-sm">Pasul 3 din 4</p>
+            </div>
+
+            <div className="bg-glass-light rounded-xl p-6 border border-glass-medium space-y-4">
+              <div className="flex items-start gap-4">
+                <MessageCircle className="w-6 h-6 text-accent-cyan mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-text-primary mb-1">
+                    Notificări Telegram
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    Primește alerte direct pe Telegram pentru matches și filtre
+                  </p>
+                </div>
+              </div>
+
+              {enableTelegram && (
+                <div className="mt-4">
+                  <label className="block text-sm font-display text-text-secondary mb-2">
+                    Username Telegram
+                  </label>
+                  <div className="relative">
+                    <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                    <input
+                      type="text"
+                      value={telegramUsername}
+                      onChange={(e) => setTelegramUsername(e.target.value)}
+                      className="input-field pl-12"
+                      placeholder="@username"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <label className="flex items-center gap-3 mt-4">
+                <input
+                  type="checkbox"
+                  checked={enableTelegram}
+                  onChange={(e) => setEnableTelegram(e.target.checked)}
+                  className="w-5 h-5 rounded accent-cyan cursor-pointer"
+                />
+                <span className="text-sm font-medium">Activează Telegram</span>
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleSkipTelegram}
+                className="flex-1 btn-secondary py-3 rounded-lg font-semibold transition-all"
+              >
+                Sări
+              </button>
+              <button
+                onClick={() => setStep(4)}
+                className="flex-1 btn-primary py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+              >
+                Continuă
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 4: Done */}
+        {step === 4 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="glass-card p-8 space-y-6 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: 'spring' }}
+              className="mx-auto w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center"
+            >
+              <CheckCircle2 className="w-8 h-8 text-accent-green" />
+            </motion.div>
+
+            <div>
+              <h2 className="text-2xl font-display font-bold text-text-primary mb-2">
+                Gata!
+              </h2>
+              <p className="text-text-muted text-sm">Pasul 4 din 4</p>
+            </div>
+
+            <div className="bg-glass-light rounded-xl p-4 border border-glass-medium">
+              <p className="text-sm text-text-secondary">
+                Contul {username} a fost creat cu succes! ✨
+              </p>
+            </div>
+
+            <button
+              onClick={handleFinish}
+              className="w-full btn-primary py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+            >
+              <LogIn className="w-5 h-5" />
+              Loghează-te Acum
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
