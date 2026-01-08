@@ -61,9 +61,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head />
-      <body className="font-sans antialiased bg-dark text-text-primary">
-        {children}
-      </body>
+      <body className="font-body antialiased bg-primary text-text-primary">
+   {children}
+</body>
     </html>
   );
 }

@@ -28,17 +28,28 @@ export default function LoginPage() {
       }
 
       if (user) {
-        // Salvează userul în localStorage
+        // 1. Salvează în localStorage pentru client
         authHelpers.saveUser(user);
         
+        // 2. SETEAZĂ COOKIE-UL PENTRU MIDDLEWARE (IMPORTANT!)
+        // Acest pas face ca serverul să te lase să intri în /dashboard
+        document.cookie = "rsq_session=active; path=/; max-age=86400; SameSite=Lax";
+        
+        // 3. Dacă ești admin, setează și cookie-ul de admin (opțional)
+        if (username === 'admin') { // Exemplu de verificare
+           document.cookie = "rsq_is_admin=true; path=/; max-age=86400; SameSite=Lax";
+        }
+
         // Redirect la dashboard
         router.push('/dashboard');
+        router.refresh(); // Forțează reîncărcarea pentru middleware
       }
     } catch (err) {
       setError('Eroare la autentificare. Încearcă din nou.');
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
