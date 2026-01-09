@@ -1,10 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// Acestea vor fi citite din Secrets-ul de pe serverul Supabase
-const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN')
+// Aceste două variabile sunt oferite AUTOMAT de Supabase, nu trebuie să le setezi tu
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+// Aceasta este singura pe care o setăm noi manual
+const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN')
 
 const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
@@ -17,7 +19,7 @@ serve(async (req) => {
       const phoneNumber = update.message.contact.phone_number.replace('+', '')
       const chatId = update.message.chat.id.toString()
 
-      // Căutăm în profiles folosind coloana de telefon (asigură-te că se numește phone_number)
+      // Căutăm în profiles (asigură-te că tabelul și coloana există)
       const { data: profile, error: searchError } = await supabase
         .from('profiles')
         .select('id')
@@ -51,7 +53,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ ok: true }), { status: 200 })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 400 })
+    console.error("Eroare:", err.message)
+    return new Response(JSON.stringify({ error: err.message }), { status: 200 })
   }
 })
 
