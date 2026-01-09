@@ -32,10 +32,10 @@ const config: Config = {
         }
       },
       fontFamily: {
-        display: ['var(--font-outfit)', 'sans-serif'],
-        body: ['var(--font-dm-sans)', 'sans-serif'],
-        mono: ['var(--font-jetbrains)', 'monospace'],
-      },
+  display: ['var(--font-outfit)', 'sans-serif'],
+  sans: ['var(--font-dm-sans)', 'sans-serif'],
+  mono: ['var(--font-jetbrains-mono)', 'monospace'], // Verifică să fie 'jetbrains-mono' nu doar 'jetbrains'
+},
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'glow': 'glow 2s ease-in-out infinite',
