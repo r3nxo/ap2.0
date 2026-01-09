@@ -2,3 +2,6 @@ git add app/page.tsx
 git commit -m "Add navigation links to homepage buttons"
 git push
 node_modules
+.next
+out
+.env*.local
