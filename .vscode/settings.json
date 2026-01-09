@@ -1,18 +1,40 @@
 {
-    "chat.mcp.serverSampling": {
-        "livepick-pwa/.vscode/mcp.json: com.supabase/mcp": {
-            "allowedModels": [
-                "copilot/auto",
-                "copilot/claude-haiku-4.5",
-                "gemini/models/gemini-2.5-flash",
-                "gemini/models/gemini-2.5-pro",
-                "gemini/models/gemini-3-flash-preview",
-                "gemini/models/gemini-3-pro-preview",
-                "copilot/gpt-4.1",
-                "copilot/gpt-4o",
-                "copilot/gpt-5-mini",
-                "copilot/oswe-vscode-prime"
-            ]
-        }
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "chat.mcp.serverSampling": {
+    "livepick-pwa/.vscode/mcp.json: com.supabase/mcp": {
+      "allowedModels": [
+        "copilot/auto",
+        "copilot/claude-haiku-4.5",
+        "gemini/models/gemini-2.5-flash",
+        "gemini/models/gemini-2.5-pro",
+        "gemini/models/gemini-3-flash-preview",
+        "gemini/models/gemini-3-pro-preview",
+        "copilot/gpt-4.1",
+        "copilot/gpt-4o",
+        "copilot/gpt-5-mini",
+        "copilot/oswe-vscode-prime"
+      ]
     }
+  },
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ]
 }
