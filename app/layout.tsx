@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // ============================================
@@ -63,6 +64,7 @@ export default function RootLayout({
       <head />
       <body className="font-body antialiased bg-primary text-text-primary">
    {children}
+        <Analytics />
 </body>
     </html>
   );
