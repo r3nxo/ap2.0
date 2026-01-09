@@ -137,8 +137,10 @@ export async function checkAPIStatus() {
 // EXPORT
 // ============================================
 
-export default {
+const unifiedFootballApi = {
   getLiveMatches,
   getMatchStatistics,
   checkAPIStatus,
 };
+
+export default unifiedFootballApi;
